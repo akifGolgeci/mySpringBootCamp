@@ -2,7 +2,10 @@ package com.example.driver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
+//OpenFeign interfacelerini görebilmesi için gerekli anatasyon
+@EnableFeignClients
 @SpringBootApplication
 public class DriverApplication {
 
