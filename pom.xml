@@ -77,6 +77,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- 1. MapStruct Core -->
         <dependency>
             <groupId>org.mapstruct</groupId>
