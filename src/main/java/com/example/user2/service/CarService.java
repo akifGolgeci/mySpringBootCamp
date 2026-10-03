@@ -8,12 +8,13 @@ import com.example.user2.exception.CarAlreadyExistException;
 import com.example.user2.exception.CarNotFoundException;
 import com.example.user2.mapper.CarMapper;
 import com.example.user2.repository.CarRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 @Service
 public class CarService {
     private final CarRepository carRepository;
@@ -26,6 +27,7 @@ public class CarService {
 
 
     public List<CarResponseDto> getCars() {
+        log.info("getCars() called ");
         List<Car> cars = carRepository.findAll();
 
         if (cars.isEmpty()) {
@@ -35,6 +37,7 @@ public class CarService {
     }
 
     public CarResponseDto getCarByModel(String model) {
+        log.info("getCarByModel() called ");
         Car car = carRepository.findByModel(model).orElseThrow(() -> new CarNotFoundException("Car not found"));
 
         return carMapper.carToCarResponseDto(car);
@@ -42,6 +45,7 @@ public class CarService {
     }
 
     public CarResponseDto createCar(CarRequestDtoByJPABuddy carRequestDto) {
+        log.info("createCar() called ");
         Optional<Car> car = carRepository.findByModel(carRequestDto.getModel());
         if (car.isPresent()) {
             throw new CarAlreadyExistException("Car already exist");
@@ -52,6 +56,7 @@ public class CarService {
     }
 
     public CarResponseDto updateCar(Integer id,CarRequestDto carRequestDto) {
+        log.info("updateCar() called ");
         Car car = carRepository.findById(id).orElseThrow(() -> new CarNotFoundException("Car not found"));
 
         //YANLIŞ UPDATE KULLANIMI. MAPPER DA KULLANILIDĞI İÇİN PERFORMANSLI DEĞİLDİR.
@@ -69,15 +74,18 @@ public class CarService {
     }
 
     public void deleteCarByModel(String model) {
+        log.info("deleteCarByModel() called ");
         Car car = carRepository.findByModel(model).orElseThrow(() -> new CarNotFoundException("Car not found"));
         carRepository.delete(car);
     }
 
     public CarResponseDto getCarById(Integer id) {
+        log.info("getCarById() called ");
         return carMapper.carToCarResponseDto(carRepository.findById(id).orElseThrow(() -> new CarNotFoundException("Car not found")));
     }
 
     public CarResponseDto createCar2(CarRequestDto carRequestDto) {
+        log.info("createCar2() called ");
         Optional<Car> car = carRepository.findByModel(carRequestDto.getModel());
         if (car.isPresent()) {
             throw new CarAlreadyExistException("Car already exist");
@@ -102,6 +110,7 @@ public class CarService {
     }
 
     public void deleteCarById(Integer id) {
+        log.info("deleteCarById() called ");
         Car car = carRepository.findById(id).orElseThrow(() -> new CarNotFoundException("Car not found"));
         carRepository.delete(car);
     }

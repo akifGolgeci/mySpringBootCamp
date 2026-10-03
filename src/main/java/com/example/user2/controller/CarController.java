@@ -35,6 +35,10 @@ public class CarController {
     // Custom oluşturduğumuz headerı da görmek için buraya @RequestHeader ekliyoruz çünkü custom headerler dış servisten gelir
     @GetMapping
     public ResponseEntity<List<CarResponseDto>> findAll(@RequestHeader("header") HttpHeaders headers ) {
+        log.error("error2");
+        log.debug("debug2");
+        log.info("info2");
+        log.trace("trace2");
         headers.forEach((k,v)->{
             System.out.println("header: "+ k + "-> "+ v);
         });
@@ -47,8 +51,7 @@ public class CarController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CarResponseDto> findById(
-             @PathVariable @Min(1) Integer id) {
+    public ResponseEntity<CarResponseDto> findById(@PathVariable @Min(1) Integer id) {
         return ResponseEntity.ok(carService.getCarById(id));
     }
     @GetMapping("/by-id")

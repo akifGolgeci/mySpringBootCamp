@@ -6,8 +6,11 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 
+// log çıktısında dizi gibi şeyler varsa @ToStringle daha okunabilir olmasını sağlıyoruz.
+@ToString
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

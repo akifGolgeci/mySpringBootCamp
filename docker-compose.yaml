@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: user2-postgres
+    environment:
+      POSTGRES_DB: postgres2
+      POSTGRES_USER: postgres2
+      POSTGRES_PASSWORD: 12345
+    healthcheck:
+      test: ["CMD","pg_isready","-U", "postgres2"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "5433:5432"
+    networks:
+      - user2-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  user2:
+    image: shadower57/user2:v2
+    container_name: user2-8081
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres2
+      SPRING_DATASOURCE_PASSWORD: 12345
+      SPRING_DATASOURCE_USERNAME: postgres2
+    networks:
+      - user2-network
+    healthcheck:
+      test: ["CMD","wget", "-qO-","http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+    user2-network:
+      external: true
+
+volumes:
+  postgres_data:
