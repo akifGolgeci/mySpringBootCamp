@@ -1,10 +1,8 @@
-package com.example.user2.config;
+package com.example.user2.security;
 
 import com.example.user2.entity.User;
 import com.example.user2.repository.UserRepository;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,6 +40,20 @@ public class MyAuthenticationProvider implements AuthenticationProvider {
         User user = userRepository.findByUsername(username).orElseThrow(() ->
                 new UsernameNotFoundException("Username not found"));
         if(passwordEncoder.matches(password, user.getPassword()) ){
+
+            if (!user.isEnabled()) {
+                throw new DisabledException("User is disabled");
+            }
+            if (!user.isAccountNonLocked()) {
+                throw new LockedException("User is locked");
+            }
+            if (!user.isAccountNonExpired()) {
+                throw new AccountExpiredException("User account have expired");
+            }
+            if (!user.isCredentialsNonExpired()) {
+                throw new CredentialsExpiredException("User credentials have expired");
+            }
+
             List<GrantedAuthority> grantedAuthorityList = List.of(new SimpleGrantedAuthority(user.getRoles().name()));
 
             //şifre null olarak yollanmalı

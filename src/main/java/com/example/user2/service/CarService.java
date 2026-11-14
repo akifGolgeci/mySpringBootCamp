@@ -9,6 +9,11 @@ import com.example.user2.exception.CarNotFoundException;
 import com.example.user2.mapper.CarMapper;
 import com.example.user2.repository.CarRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,6 +21,9 @@ import java.util.List;
 import java.util.Optional;
 @Slf4j
 @Service
+// Genellikle service sınıfında caching anatasyonları kullanılır
+// listelerde caching yaparken paging veya specification ekleyeceksek key de belirtmeliyiz.
+// rediste aynı anda aynı antasyonu kullanamayız. @Caching anatasyonu içinde yazılır
 public class CarService {
     private final CarRepository carRepository;
     private final CarMapper carMapper;
@@ -24,10 +32,16 @@ public class CarService {
         this.carRepository = carRepository;
         this.carMapper = carMapper;
     }
+    // 1. cacheNames ve Value aynı işlevi görür
+    // 2. @Cacheable(cacheNames = "cars") keysiz yazarsak cachede cars:: bu şekilde tutulur
+    // 3. @Cacheable(cacheNames = "cars", key = "{#category, #page, #pageSize}")
+    // keyle yazarsa cachede cars::[Sport cars, 0, 10] şeklinde tutulur
+    // 4. @Cacheable(cacheNames = "cars", key = "#root.methodName") metod adıyla tutmak isityorsak kullanılır
+    // cars::getCars şeklinde cachede tutulur.
 
-
+    @Cacheable(cacheNames = "cars")   // cars::
     public List<CarResponseDto> getCars() {
-        log.info("getCars() called ");
+        log.info("getCars() executed ");
         List<Car> cars = carRepository.findAll();
 
         if (cars.isEmpty()) {
@@ -41,9 +55,10 @@ public class CarService {
         Car car = carRepository.findByModel(model).orElseThrow(() -> new CarNotFoundException("Car not found"));
 
         return carMapper.carToCarResponseDto(car);
-
     }
 
+    // yeni ürün eklendiğinde liste değişir bu yüzden liste silinir
+    @CacheEvict(value = "cars", allEntries = true)
     public CarResponseDto createCar(CarRequestDtoByJPABuddy carRequestDto) {
         log.info("createCar() called ");
         Optional<Car> car = carRepository.findByModel(carRequestDto.getModel());
@@ -55,6 +70,12 @@ public class CarService {
         return carMapper.carToCarResponseDto(savedCar);
     }
 
+    //sadece @CachePut kullanırsak idyi günceller cars::2  cachedeki cars listesini güncellemez bu yüzden cacheteki
+    // listeyi silmeliyiz. ki tüm listeyi döndürmek istediğimizde cachedeki eski carsList verisin görmeyelim
+    @Caching(
+            put = { @CachePut(value = "car", key = "#id")},
+            evict = { @CacheEvict(value = "cars", allEntries = true)}
+    )
     public CarResponseDto updateCar(Integer id,CarRequestDto carRequestDto) {
         log.info("updateCar() called ");
         Car car = carRepository.findById(id).orElseThrow(() -> new CarNotFoundException("Car not found"));
@@ -70,8 +91,10 @@ public class CarService {
         car.setBrand(carRequestDto.getBrand());
 
         Car savedCar = carRepository.save(car);
-        return carMapper.carToCarResponseDto(savedCar);
+        CarResponseDto carResponseDto = carMapper.carToCarResponseDto(savedCar);
+        return carResponseDto;
     }
+
 
     public void deleteCarByModel(String model) {
         log.info("deleteCarByModel() called ");
@@ -79,6 +102,8 @@ public class CarService {
         carRepository.delete(car);
     }
 
+    // Sadece metottaki returnü çalıştırır metodun içini çalıştırmaz
+    @Cacheable(value = "car", key = "#id") // car::1     car::2     şeklinde cache 'e kaydedilir.
     public CarResponseDto getCarById(Integer id) {
         log.info("getCarById() called ");
         return carMapper.carToCarResponseDto(carRepository.findById(id).orElseThrow(() -> new CarNotFoundException("Car not found")));
@@ -109,6 +134,10 @@ public class CarService {
         return list;
     }
 
+    // cachingle yazmalıyız yoksa çalışmaz.
+    @Caching(evict = {
+            @CacheEvict(value = "car", key = "#id"), @CacheEvict(value = "cars", allEntries = true)
+    })
     public void deleteCarById(Integer id) {
         log.info("deleteCarById() called ");
         Car car = carRepository.findById(id).orElseThrow(() -> new CarNotFoundException("Car not found"));

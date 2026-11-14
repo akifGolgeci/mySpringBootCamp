@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 @PasswordMatches
-public class UserRegisterDto {
+public class OldUserRegisterDto {
 
     @NotBlank(message = "username cant be empty")
     private String username;

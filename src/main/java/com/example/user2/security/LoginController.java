@@ -1,6 +1,5 @@
-package com.example.user2.controller;
+package com.example.user2.security;
 
-import com.example.user2.dto.LoginDto;
 import com.example.user2.service.LoginService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping("/api/v1/users2")
+@RequestMapping("/api/v1/users2/LoginController")
 @Controller
 public class LoginController {
 

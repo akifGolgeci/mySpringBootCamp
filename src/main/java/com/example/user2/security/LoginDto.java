@@ -1,4 +1,4 @@
-package com.example.user2.dto;
+package com.example.user2.security;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

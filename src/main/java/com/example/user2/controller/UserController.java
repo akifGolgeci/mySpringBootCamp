@@ -7,7 +7,10 @@ import com.example.user2.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users2")
@@ -18,17 +21,19 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
-    public ResponseEntity<UserResponseDto> getUser(@RequestParam long id) {
+    //@PostAuthorize("returnObject.name == authentication.name ")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable long id) {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<UserResponseDto> createUser(@PathVariable long id, @Valid @RequestBody UserRequestDto userRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(id, userRequestDto));
+    @PostMapping
+    public ResponseEntity<UserResponseDto> createUser( @Valid @RequestBody UserRequestDto userRequestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequestDto));
     }
 
-
-
-
+    @GetMapping
+    public ResponseEntity<List<UserResponseDto>> getUsers() {
+        return ResponseEntity.ok(userService.getUsers());
+    }
 }

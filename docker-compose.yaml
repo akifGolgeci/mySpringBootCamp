@@ -4,8 +4,8 @@ services:
     container_name: user2-postgres
     environment:
       POSTGRES_DB: postgres2
-      POSTGRES_USER: postgres2
-      POSTGRES_PASSWORD: 12345
+      POSTGRES_USER: ${POSTGRES2_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES2_PASSWORD}
     healthcheck:
       test: ["CMD","pg_isready","-U", "postgres2"]
       interval: 5s

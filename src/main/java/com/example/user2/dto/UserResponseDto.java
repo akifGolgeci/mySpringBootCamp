@@ -1,5 +1,6 @@
 package com.example.user2.dto;
 
+import com.example.user2.entity.RolesEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserResponseDto {
     private Long id;
-    private String name;
-    private String email;
+    private String username;
+  //private String password;
     private Integer age;
     private Integer salary;
+    private RolesEnum roles;
 }

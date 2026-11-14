@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,13 +24,9 @@ import java.util.List;
 @RequestMapping("/api/v1/cars2")
 public class CarController {
     private final CarService carService;
-    private final CarRepository carRepository;
-    private final CarMapper carMapper;
 
-    public CarController(CarService carService, CarRepository carRepository, CarMapper carMapper) {
+    public CarController(CarService carService) {
         this.carService = carService;
-        this.carRepository = carRepository;
-        this.carMapper = carMapper;
     }
 
     // Custom oluşturduğumuz headerı da görmek için buraya @RequestHeader ekliyoruz çünkü custom headerler dış servisten gelir
@@ -45,15 +42,18 @@ public class CarController {
         return ResponseEntity.ok(carService.getCars());
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_USER')")
     @GetMapping("/model")
     public ResponseEntity<CarResponseDto> findByModel(@RequestParam String model) {
         return ResponseEntity.ok(carService.getCarByModel(model));
     }
 
+    //@PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @GetMapping("/{id}")
     public ResponseEntity<CarResponseDto> findById(@PathVariable @Min(1) Integer id) {
         return ResponseEntity.ok(carService.getCarById(id));
     }
+
     @GetMapping("/by-id")
     public ResponseEntity<CarResponseDto> findById2(
             @RequestParam @Min(value = 1,message = "id should be equal or higher than 1") Integer id,
@@ -66,6 +66,11 @@ public class CarController {
 //        return ResponseEntity.status(HttpStatus.CREATED).body(carService.createCar(carRequestDto));
 //    }
 
+    // Sistemde olan USER 'ın metoda erişebildiği örnek
+    //@PreAuthorize("hasRole('ADMIN') or (#userRequestDto.username == authentication.name and hasRole('USER'))")
+
+    //@PreAuthorize("hasRole('ADMIN') or (#carRequestDto.brand.toLowerCase() == 'mercedes' and hasRole('USER'))")
+    @PreAuthorize("authentication.principal.enabled")
     @PostMapping
     public ResponseEntity<CarResponseDto> create(@Valid @RequestBody CarRequestDto carRequestDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(carService.createCar2(carRequestDto));
@@ -94,22 +99,22 @@ public class CarController {
     }
 
     // PostMapping 'de UriCompenentBuilder ile @RequestParam @RequestBody @PathVariable KULLANIMI ÖRNEĞİ
-    @PostMapping("/add/model/{model}")
-    public ResponseEntity<CarResponseDto> addCar(@PathVariable String model,
-                                                 @RequestParam Integer price,
-                                                 @Valid @RequestBody CarRequestDto carRequestDto) {
-        Car car = new Car();
-        car.setModel(model);
-        car.setPrice(price);
-        car.setBrand(carRequestDto.getBrand());
-        car.setYear(carRequestDto.getYear());
-
-        Car savedCar = carRepository.save(car);
-        CarResponseDto carResponseDto = carMapper.carToCarResponseDto(savedCar);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(carResponseDto);
-
-    }
+//    @PostMapping("/add/model/{model}")
+//    public ResponseEntity<CarResponseDto> addCar(@PathVariable String model,
+//                                                 @RequestParam Integer price,
+//                                                 @Valid @RequestBody CarRequestDto carRequestDto) {
+//        Car car = new Car();
+//        car.setModel(model);
+//        car.setPrice(price);
+//        car.setBrand(carRequestDto.getBrand());
+//        car.setYear(carRequestDto.getYear());
+//
+//        Car savedCar = carRepository.save(car);
+//        CarResponseDto carResponseDto = carMapper.carToCarResponseDto(savedCar);
+//
+//        return ResponseEntity.status(HttpStatus.CREATED).body(carResponseDto);
+//
+//    }
 
     @GetMapping("/header")
     public ResponseEntity<?> getHeader(@RequestHeader("header-one")String header1) {

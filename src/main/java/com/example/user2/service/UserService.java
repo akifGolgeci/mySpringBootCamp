@@ -7,8 +7,10 @@ import com.example.user2.exception.UserAlreadyExistException;
 import com.example.user2.exception.UserNotFoundException;
 import com.example.user2.mapper.UserMapper;
 import com.example.user2.repository.UserRepository;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,21 +22,29 @@ public class UserService {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
     }
-
+    // sadece kendi bilgilerini görebilir veya ADMINSE görebilir
+    @PostAuthorize("returnObject.username == authentication.name or hasRole('ADMIN')")
     public UserResponseDto getUser(long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("user not found with id: " + id));
         return userMapper.userToUserResponse(user);
     }
 
-    public UserResponseDto createUser(long id, UserRequestDto userRequestDto) {
-        Optional<User> user1 = userRepository.findById(id);
-        if (user1.isPresent()) {
-            throw new UserAlreadyExistException("user already exists with id: " + id);
+    public UserResponseDto createUser(UserRequestDto userRequestDto) {
+        if (userRepository.findByUsername(userRequestDto.getUsername()).isPresent()) {
+            throw new UserAlreadyExistException("username already exist");
         }
         User userCreated = userMapper.userRequestToDto(userRequestDto);
-        userCreated.setId(id);
         User savedUser = userRepository.save(userCreated);
 
         return userMapper.userToUserResponse(savedUser);
+    }
+
+    public List<UserResponseDto> getUsers() {
+        return userMapper.userToUserResponseDto(userRepository.findAll());
+    }
+
+    public void deleteUser(long id) {
+        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("user not found with id: " + id));
+        userRepository.deleteById(id);
     }
 }

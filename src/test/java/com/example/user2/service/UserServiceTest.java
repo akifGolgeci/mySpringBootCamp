@@ -1,14 +1,12 @@
-package com.example.user2;
+package com.example.user2.service;
 
 import com.example.user2.dto.UserRequestDto;
 import com.example.user2.dto.UserResponseDto;
 import com.example.user2.entity.RolesEnum;
 import com.example.user2.entity.User;
-import com.example.user2.exception.UserAlreadyExistException;
 import com.example.user2.exception.UserNotFoundException;
 import com.example.user2.mapper.UserMapper;
 import com.example.user2.repository.UserRepository;
-import com.example.user2.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
